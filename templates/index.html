@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Debugger</hV1>
+    <h2>Target</h2>
+    <p>{{ target }}</p>
+    <h2>Modules</h2>
+    <ul>
+        {% for module in target.module_iter() %}
+            <li>{{ module }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Process</h2>
+    <p>{{ process }}</p>
+    <form action="" method="POST">
+        <button type="submit" name="action" value="continue">Continue</button>
+        <button type="submit" name="action" value="kill">Kill</button>
+        <button type="submit" name="action" value="step_over">Step Over</button>
+        <button type="submit" name="action" value="step_into">Step Into</button>
+        <button type="submit" name="action" value="step_out">Step Out</button>
+    </form>
+    <h2>Source</h2>
+    <p>{{ frame.line_entry }}</p>
+    <textarea id="editor" readonly>{{ source }}</textarea>
+    <script>
+        var line = {{ frame.line_entry.line }} - 1;
+        var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+            lineNumbers: true,
+            mode: "clike",
+            readOnly: true,
+        });
+        editor.addLineClass(line, 'background', 'current-line');
+        editor.scrollIntoView(line, 0, 200);
+    </script>
+    <h2>Threads</h2>
+    {% for thread in process %}
+        <h3>{{ thread }}</h3>
+        <table>
+            <tr>
+                <th>Frame</th>
+                <th>Address (PC)</th>
+                <th></th>
+            </tr>
+        {% for each_frame in thread %}
+            <tr>
+                <td><a href="?thread={{ each_frame.thread.idx }}&frame={{ each_frame.idx }}">#{{ each_frame.idx }}</a></td>
+                <td>{{ "0x{:016x}".format(each_frame.pc) }}</td>
+                <td>{{ each_frame.addr }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endfor %}
+
+    <!-- Need a frame -->
+    <h2>Function</h2>
+    <p>{{ frame.function }}</p>
+    <h2>Variables</h2>
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
+        {% for var in frame.variables %}
+        <tr>
+            <td>{{ var.type }}</td>
+            <td>{{ var.name }}</td>
+            <td>{{ var.value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Disassembly</h2>
+    <pre>{{ frame.disassembly }}</pre>
+    <h2>Registers</h2>
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
+        {% for register in frame.regs[0] %}
+            <tr>
+                <td>{{ register.type }}</td>
+                <td>{{ register.name }}</td>
+                <td>{{ register.value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

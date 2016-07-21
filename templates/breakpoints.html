@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block body %}
+    <h2>Breakpoints</h2>
+    <ol>
+    {% for bp in breakpoints %}
+        <li>{{ bp }}</li>
+    {% endfor %}
+    </ol>
+{% endblock %}
